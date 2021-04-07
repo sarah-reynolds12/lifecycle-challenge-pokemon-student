@@ -10,11 +10,55 @@ class PokeFetch extends Component {
       pokeSprite: '',
       pokeName: '',
       secondsRemaining: 10,
-      showPokemon: false  
+      showPokemon: false,  
+      isVisible: false
     }
   }
 
+  countDown() {
+    if (this.state.showPokemon === true && this.state.secondsRemaining > 0){
+      this.setState((prevState) => ({
+        secondsRemaining: prevState.secondsRemaining - 1
+      })) 
+      console.log(this.state.secondsRemaining)
+    }
+  }
+  
+  componentDidMount () {
+    console.log("component mounted")
+    this.interval= setInterval(() => this.countDown(), 1000);
+    console.log(this.interval)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // if(this.state.pokeName !== prevState.pokeName) {
+    //   this.timer();
+    // }
+    if(this.state.secondsRemaining === 0 && this.state.isVisible === false) {
+      this.setState({isVisible: true})
+    }
+    console.log("component updated")
+  }
+
+  componentWillUnmount() {
+    console.log("component unmounted!")
+    clearInterval(this.interval);
+  }
+
+  // timer= () => {
+  //   let newTimer= setInterval(tick, 1000)
+  //   const tick = () => {
+
+  //   }
+  //   console.log('timer started')
+  // }
+
   fetchPokemon() {
+    this.setState ({
+      showPokemon: false,
+      isVisible: false, 
+      secondsRemaining: 10
+    })
     let min = Math.ceil(1);
     let max = Math.floor(152);
     let pokeNum = Math.floor(Math.random() * (max - min) + min);
@@ -26,33 +70,27 @@ class PokeFetch extends Component {
           pokeInfo: res,
           pokeSprite: res.sprites.front_default,
           pokeName: res.species.name,
+          showPokemon: true,
           secondsRemaining: 10
         })
       })
       .catch((err) => console.log(err))
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if(this.state.pokeName !== prevState.pokeName) {
-      this.timer();
-    }
-  }
-  timer= () => {
-    let newTimer= setInterval(tick, 1000)
-    const tick = () => {
-
-    }
-    console.log('timer started')
-  }
-
   render() {
     return (
       <div className={'wrapper'}>
         <button className={'start'} onClick={() => this.fetchPokemon()}>Start!</button>
-        <h1 className={'timer'} >Timer Display</h1>
-        <div className={'pokeWrap'}>
-          <img className={'pokeImg'} style={this.state.showPokemon ? {filter: "brightness(100%)"}: {filter: 'brightness(0%)'}} src={this.state.pokeSprite} />
-          <h1 className={'pokeName'} style={{display:'none'}}>{this.state.pokeName}</h1>
+        <h1 className={'timer'} >{this.state.secondsRemaining}</h1>
+        <div className={'pokeWrap'}> 
+        {this.state.isVisible ? (
+          <div>
+          <img className={'pokeImg'} src={this.state.pokeSprite} alt="" />
+          <h1 className={'pokeName'}>{this.state.pokeName}</h1>
+          </div>
+         ) : (<img className={'pokeImg'} src={this.state.pokeSprite} alt= "" style={{filter: "brightness(0)"}}/>
+         )}
+          {/* {this.state.isVisible ? <h1 className={'pokeName'}>{this.state.pokeName}</h1> */}
         </div>
       </div>
     )
